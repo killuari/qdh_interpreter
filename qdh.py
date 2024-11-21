@@ -8,6 +8,7 @@ file = "test.qdh"
 class QDHInterpreter:
     def __init__(self):
         self.code = self.readfile()
+        self.lines = self.code.split('\n')
         self.vars = {}
         self.stack = []
         self.pc = 0
@@ -20,46 +21,54 @@ class QDHInterpreter:
             print(f"File {file} not found")
             sys.exit(1)
 
+    def set_pc_to_end(self):
+        left = 1
+        while left > 0:
+            self.pc += 1
+            line = self.lines[self.pc].lstrip()
+            if "{" in line or "}" in line:
+                for char in line:
+                    if char == "}":
+                        left -= 1
+                    elif char == "{":
+                        left += 1
+        return line
+
+    def set_pc_to_start(self):
+        left = 1
+        while left > 0:
+            self.pc -= 1
+            line = self.lines[self.pc].lstrip()
+            if "{" in line or "}" in line:
+                for char in line:
+                    if char == "}":
+                        left += 1
+                    elif char == "{":
+                        left -= 1
+        return line
+
     def run(self):
-        lines = self.code.split('\n')
-        while self.pc < len(lines):
-            line = lines[self.pc].lstrip()
-            if line.startswith("if"):
+        while self.pc < len(self.lines):
+            line = self.lines[self.pc].lstrip()
+            if line.startswith("//"):
+                self.pc += 1
+            elif line.startswith("if"):
                 if self.eval_expr(line[3:-1]) == "true":
                     self.pc += 1
                 else:
-                    left = 1
-                    while left > 0:
-                        self.pc += 1
-                        line = lines[self.pc].lstrip()
-                        if "{" in line:
-                            left += 1
-                        if "}" in line:
-                            left -= 1
+                    line = self.set_pc_to_end()
                     self.pc += 1
+                    
             elif line.startswith("while"):
                 if self.eval_expr(line[5:-1]) == "true":
                     self.pc += 1
                 else:
-                    left = 1
-                    while left > 0:
-                        self.pc += 1
-                        line = lines[self.pc].lstrip()
-                        if "{" in line:
-                            left += 1
-                        if "}" in line:
-                            left -= 1
+                    line = self.set_pc_to_end()
                     self.pc += 1
+
             elif line.startswith("}"):
                 start = self.pc
-                left = 1
-                while left > 0:
-                    self.pc -= 1
-                    line = lines[self.pc].lstrip()
-                    if "}" in line:
-                        left += 1
-                    elif "{" in line:
-                        left -= 1
+                line = self.set_pc_to_start()
                 if line.startswith("if"):
                     self.pc = start + 1
                 if line.startswith("while"):
@@ -67,30 +76,45 @@ class QDHInterpreter:
                         self.pc += 1
                     else:
                         self.pc = start + 1
+
             elif line.startswith("println"):
-                if line[8] == '"':
-                    print(line[9:-2])
-                else:
-                    print(self.eval_expr(line[8:-1]))
+                print(self.eval_expr(line[8:-1]))
                 self.pc += 1
+
             elif line.startswith("print"):
-                if line[6] == '"':
-                    print(line[7:-2], end="")
-                else:
-                    print(self.eval_expr(line[6:-1]), end="")
+                print(self.eval_expr(line[6:-1]), end="")
                 self.pc += 1
+
             elif "=" in line:
                 var, expr = line.split("=", maxsplit=1)
                 var = var.rstrip()
                 self.vars[var] = self.eval_expr(expr)
                 self.pc += 1
+
             else:
                 self.pc += 1
 
     def eval_expr(self, expr):
-        tokens = self.tokenize(expr)
-        postfix = self.infix_to_postfix(tokens)
-        return self.eval_postfix(postfix)
+        expr = expr.lstrip()
+        if expr.startswith('"'):
+            evaluation = ""
+            string = expr[1:-1]
+            idx = 0
+            while idx < len(string):
+                char = string[idx]
+                if char == "\\" and string[idx + 1] == "{":
+                    ex_start = idx + 2
+                    ex_end = string.find("}", ex_start)
+                    evaluation += str(self.eval_expr(string[ex_start:ex_end]))
+                    idx = ex_end + 1
+                else:
+                    evaluation += char
+                    idx += 1
+        else:
+            tokens = self.tokenize(expr)
+            postfix = self.infix_to_postfix(tokens)
+            evaluation = self.eval_postfix(postfix)
+        return evaluation
 
     def tokenize(self, expr):
         token_pattern = r'[a-zA-Z_][a-zA-Z_0-9]*|\d+|true|false|[+\-*/<>=!()^]+'
