@@ -12,8 +12,6 @@ class QDHInterpreter:
         self.stack = []
         self.pc = 0
 
-
-
     def readfile(self):
         try:
             with open(file, 'r') as f:
