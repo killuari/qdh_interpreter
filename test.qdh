@@ -1,7 +1,11 @@
-println("Hello World")
 x=2*45
 y = x <= 10^2
-println("x = \{x}, y = \{y}")
+
+// TODO:
+// a = "y = \{y},"
+// print(a)
+
+println("x = \{x}")
 if y {
     if 20 * 2 > 50 {
         println("false nested if")

@@ -50,7 +50,9 @@ class QDHInterpreter:
     def run(self):
         while self.pc < len(self.lines):
             line = self.lines[self.pc].lstrip()
-            if line.startswith("if"):
+            if line.startswith("//"):
+                self.pc += 1
+            elif line.startswith("if"):
                 if self.eval_expr(line[3:-1]) == "true":
                     self.pc += 1
                 else:
