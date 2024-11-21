@@ -2,8 +2,8 @@
 
 import sys, re
 
-#file = sys.argv[1]
-file = "test.qdh"
+file = sys.argv[1]
+#file = test.qdh
 
 class QDHInterpreter:
     def __init__(self):
@@ -28,61 +28,21 @@ class QDHInterpreter:
                 if self.eval_expr(line[3:-1]) == "true":
                     self.pc += 1
                 else:
-                    left = 1
-                    while left > 0:
+                    while not line.startswith("}"):
                         self.pc += 1
                         line = lines[self.pc].lstrip()
-                        if "{" in line:
-                            left += 1
-                        if "}" in line:
-                            left -= 1
                     self.pc += 1
             elif line.startswith("while"):
-                if self.eval_expr(line[5:-1]) == "true":
-                    self.pc += 1
-                else:
-                    left = 1
-                    while left > 0:
-                        self.pc += 1
-                        line = lines[self.pc].lstrip()
-                        if "{" in line:
-                            left += 1
-                        if "}" in line:
-                            left -= 1
-                    self.pc += 1
-            elif line.startswith("}"):
-                start = self.pc
-                left = 1
-                while left > 0:
-                    self.pc -= 1
-                    line = lines[self.pc].lstrip()
-                    if "}" in line:
-                        left += 1
-                    elif "{" in line:
-                        left -= 1
-                if line.startswith("if"):
-                    self.pc = start + 1
-                if line.startswith("while"):
-                    if self.eval_expr(line[5:-1]) == "true":
-                        self.pc += 1
-                    else:
-                        self.pc = start + 1
-            elif line.startswith("println"):
-                if line[8] == '"':
-                    print(line[9:-2])
-                else:
-                    print(self.eval_expr(line[8:-1]))
+                pass
+            elif "=" in line:
+                var, expr = line.split(" = ")
+                self.vars[var] = self.eval_expr(expr)
                 self.pc += 1
             elif line.startswith("print"):
                 if line[6] == '"':
-                    print(line[7:-2], end="")
+                    print(line[7:-2])
                 else:
-                    print(self.eval_expr(line[6:-1]), end="")
-                self.pc += 1
-            elif "=" in line:
-                var, expr = line.split("=", maxsplit=1)
-                var = var.rstrip()
-                self.vars[var] = self.eval_expr(expr)
+                    print(self.eval_expr(line[6:-1]))
                 self.pc += 1
             else:
                 self.pc += 1
