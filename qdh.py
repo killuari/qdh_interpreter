@@ -1,4 +1,4 @@
-import sys
+import sys, re
 
 #file = sys.argv[1]
 file = "test.qdh"
@@ -33,8 +33,8 @@ class QDHInterpreter:
             self.pc += 1
 
     def tokenize(self, expr):
-        tokens = expr.split()
-        return tokens
+        token_pattern = r'[a-zA-Z_][a-zA-Z_0-9]*|\d+|[+\-*/()^]'
+        return re.findall(token_pattern, expr)
 
     def infix_to_postfix(self, tokens):
         precedence = {'+':1, '-':1, '*':2, '/':2, '^':3}
