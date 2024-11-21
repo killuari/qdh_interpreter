@@ -67,15 +67,22 @@ class QDHInterpreter:
                         self.pc += 1
                     else:
                         self.pc = start + 1
-            elif "=" in line:
-                var, expr = line.split(" = ")
-                self.vars[var] = self.eval_expr(expr)
+            elif line.startswith("println"):
+                if line[8] == '"':
+                    print(line[9:-2])
+                else:
+                    print(self.eval_expr(line[8:-1]))
                 self.pc += 1
             elif line.startswith("print"):
                 if line[6] == '"':
-                    print(line[7:-2])
+                    print(line[7:-2], end="")
                 else:
-                    print(self.eval_expr(line[6:-1]))
+                    print(self.eval_expr(line[6:-1]), end="")
+                self.pc += 1
+            elif "=" in line:
+                var, expr = line.split("=", maxsplit=1)
+                var = var.rstrip()
+                self.vars[var] = self.eval_expr(expr)
                 self.pc += 1
             else:
                 self.pc += 1
