@@ -1,6 +1,7 @@
-print("Hello World")
+println("Hello World")
 x=2*45
 y = x <= 10^2
+println("x = \{x}, y = \{y}")
 if y {
     if 20 * 2 > 50 {
         println("false nested if")
@@ -24,9 +25,9 @@ a = 1
 while a <= 10 {
     b = 1
     while b <= 10 {
-        print("a * b = ")
+        print("\{a} * \{b} = ")
         println(a * b)
-        b = b+1
+        b = b + 1
     }
     a = a+1
 }
