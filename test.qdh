@@ -2,6 +2,21 @@ print("Hello World")
 x = 2*45
 y = x <= 10^2
 if y {
+    if 20 * 2 > 50 {
+        print("false nested if")
+    }
+    if 20 * 2 < 50 {
+        print("true nested if")
+    }
     print("y is true")
 }
 print("after if")
+
+print("while loop:")
+x = 10
+while x >= 0 {
+    print(x)
+    x = x - 1
+}
+
+print("second while loop")

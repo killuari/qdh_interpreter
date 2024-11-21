@@ -2,8 +2,8 @@
 
 import sys, re
 
-file = sys.argv[1]
-#file = test.qdh
+#file = sys.argv[1]
+file = "test.qdh"
 
 class QDHInterpreter:
     def __init__(self):
@@ -11,8 +11,6 @@ class QDHInterpreter:
         self.vars = {}
         self.stack = []
         self.pc = 0
-
-
 
     def readfile(self):
         try:
@@ -30,12 +28,45 @@ class QDHInterpreter:
                 if self.eval_expr(line[3:-1]) == "true":
                     self.pc += 1
                 else:
-                    while not line.startswith("}"):
+                    left = 1
+                    while left > 0:
                         self.pc += 1
                         line = lines[self.pc].lstrip()
+                        if "{" in line:
+                            left += 1
+                        if "}" in line:
+                            left -= 1
                     self.pc += 1
             elif line.startswith("while"):
-                pass
+                if self.eval_expr(line[5:-1]) == "true":
+                    self.pc += 1
+                else:
+                    left = 1
+                    while left > 0:
+                        self.pc += 1
+                        line = lines[self.pc].lstrip()
+                        if "{" in line:
+                            left += 1
+                        if "}" in line:
+                            left -= 1
+                    self.pc += 1
+            elif line.startswith("}"):
+                start = self.pc
+                left = 1
+                while left > 0:
+                    self.pc -= 1
+                    line = lines[self.pc].lstrip()
+                    if "}" in line:
+                        left += 1
+                    elif "{" in line:
+                        left -= 1
+                if line.startswith("if"):
+                    self.pc = start + 1
+                if line.startswith("while"):
+                    if self.eval_expr(line[5:-1]) == "true":
+                        self.pc += 1
+                    else:
+                        self.pc = start + 1
             elif "=" in line:
                 var, expr = line.split(" = ")
                 self.vars[var] = self.eval_expr(expr)
