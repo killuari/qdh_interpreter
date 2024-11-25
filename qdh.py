@@ -2,8 +2,8 @@
 
 import sys, re
 
-#file = sys.argv[1]
-file = "test.qdh"
+file = sys.argv[1]
+#file = "test.qdh"
 
 class QDHInterpreter:
     def __init__(self):
